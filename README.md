@@ -29,8 +29,8 @@ This project implements feature selection techniques in C++ to evaluate and iden
 - Trade-offs between feature subset size and performance
 
 ## Dataset: UCI Wine
-- Ran Forward Selection and Backward Elimination a real public dataset
-- Results can be found in the project report, link below
+- I also ran Forward Selection and Backward Elimination a real public dataset
+- Results and details can be found in the project report linked at the bottom
 - Link to dataset: https://archive.ics.uci.edu/dataset/109/wine
 
 ## Building the Project
