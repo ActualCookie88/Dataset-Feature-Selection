@@ -36,11 +36,10 @@ This project implements feature selection techniques in C++ to evaluate and iden
 ## Building the Project
 1. Clone the repo (if you haven't already)
 ```bash
-git clone https://github.com/ActualCookie88/IntroToAIProjects.git
+git clone (https://github.com/ActualCookie88/Dataset-Feature-Selection.git
 ```
-2. Navigate to folder and build executable
+2. Build executable
 ```bash
-cd Dataset_Feature_Selection/
 g++ -std=c++17 feature_selection.cpp -o feature_selection
 ```
 
