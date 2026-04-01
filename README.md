@@ -70,4 +70,4 @@ The program displays:
 
 ## Report
 For detailed results and analysis, see project report:
-[View Project Report](report/Feature-SelectionProjectReport.pdf)
+[View Project Report](docs/Feature-SelectionProjectReport.pdf)
