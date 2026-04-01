@@ -35,7 +35,7 @@ This project implements feature selection techniques in C++ to evaluate and iden
 
 ## Interactive Demo
 Below is a link to an interactive visual demo of the feature selection algorithms.
-[Link here](https://ActualCookie88.github.io/Dataset-Feature-Selection/docs/visualizer.html)
+[Link here](https://ActualCookie88.github.io/Dataset-Feature-Selection/visualizer.html)
 
 ## Building the Project
 1. Clone the repo
