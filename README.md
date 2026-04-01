@@ -33,6 +33,10 @@ This project implements feature selection techniques in C++ to evaluate and iden
 - Results and details can be found in the project report linked at the bottom
 - Link to dataset: https://archive.ics.uci.edu/dataset/109/wine
 
+## Interactive Demo
+Below is a link to an interactive visual demo of the feature selection algorithms.
+[Link here](https://ActualCookie88.github.io/Dataset-Feature-Selection/docs/visualizer.html)
+
 ## Building the Project
 1. Clone the repo
 ```bash
