@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feature Selection — Luke Matsunaga</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#0d0f0e;--bg2:#151817;--bg3:#1c201e;--bg4:#232826;
+  --text:#e8ece9;--text2:#8a9690;--text3:#4f5c58;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --green:#4ade80;--green2:#22c55e;--amber:#f59e0b;--red:#f87171;--blue:#60a5fa;--cyan:#22d3ee;
+  --radius:6px;--radius-lg:10px;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);padding:2.5rem 2rem 4rem;font-size:14px;max-width:900px;margin:0 auto;min-height:100vh;}
+.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
+.header-tag{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;color:var(--green);text-transform:uppercase;margin-bottom:6px;}
+h1{font-family:var(--mono);font-size:20px;font-weight:600;letter-spacing:-0.02em;color:var(--text);margin-bottom:4px;}
+.header-sub{font-size:13px;color:var(--text2);}
+.header-sub a{color:var(--cyan);text-decoration:none;font-family:var(--mono);font-size:12px;}
+.header-sub a:hover{text-decoration:underline;}
+.header-right{display:flex;gap:6px;align-items:center;padding-top:4px;}
+.badge{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:3px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);letter-spacing:0.04em;}
+.section-label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;}
+hr{border:none;border-top:1px solid var(--border);margin:1.8rem 0;}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.5rem;}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;}
+.stat-label{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.stat-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);}
+.controls-row{display:flex;align-items:center;gap:12px;margin-bottom:1.4rem;flex-wrap:wrap;}
+.controls-row label{font-family:var(--mono);font-size:11px;color:var(--text2);}
+select{font-family:var(--mono);font-size:11px;padding:6px 12px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer;}
+.overlay-toggle{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:3px;margin-left:auto;}
+.ov-btn{font-family:var(--mono);font-size:10px;padding:5px 12px;border-radius:6px;border:none;background:transparent;color:var(--text2);cursor:pointer;transition:all 0.15s;letter-spacing:0.02em;}
+.ov-btn.active{background:var(--bg4);color:var(--text);border:1px solid var(--border2);}
+.ov-btn:hover:not(.active){color:var(--text);}
+.chart-legend{display:flex;gap:18px;margin-bottom:10px;flex-wrap:wrap;}
+.legend-pill{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--text2);}
+.legend-line{width:20px;height:2px;border-radius:1px;}
+.chart-wrap{position:relative;width:100%;height:260px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:1.4rem;}
+.feat-bars-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.reveal-btn{font-family:var(--mono);font-size:10px;padding:6px 14px;border-radius:var(--radius);border:1px solid var(--cyan);background:rgba(34,211,238,0.07);color:var(--cyan);cursor:pointer;transition:all 0.15s;letter-spacing:0.04em;}
+.reveal-btn:hover{background:rgba(34,211,238,0.15);}
+.reveal-btn:disabled{opacity:0.4;cursor:default;}
+.feat-bars{display:flex;flex-direction:column;gap:10px;}
+.feat-bar-row{display:flex;align-items:center;gap:10px;opacity:0;transform:translateX(-8px);transition:opacity 0.4s ease,transform 0.4s ease;}
+.feat-bar-row.visible{opacity:1;transform:translateX(0);}
+.feat-bar-name{font-family:var(--mono);font-size:11px;color:var(--text2);width:150px;flex-shrink:0;}
+.feat-order{font-family:var(--mono);font-size:9px;color:var(--text3);display:block;margin-top:1px;}
+.feat-bar-bg{flex:1;height:18px;background:var(--bg3);border-radius:3px;overflow:hidden;border:1px solid var(--border);}
+.feat-bar-fill{height:100%;border-radius:3px;background:var(--cyan);width:0%;transition:width 0.7s cubic-bezier(0.25,1,0.5,1);opacity:0.75;}
+.feat-bar-val{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--cyan);width:42px;text-align:right;opacity:0;transition:opacity 0.3s 0.5s;}
+.feat-bar-row.visible .feat-bar-val{opacity:1;}
+.acc-delta{font-family:var(--mono);font-size:10px;padding:1px 6px;border-radius:3px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);color:var(--green);white-space:nowrap;opacity:0;transition:opacity 0.3s 0.6s;}
+.feat-bar-row.visible .acc-delta{opacity:1;}
+.acc-live{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;display:flex;align-items:center;gap:16px;margin-bottom:1.4rem;flex-wrap:wrap;}
+.acc-val-big{font-family:var(--mono);font-size:28px;font-weight:600;color:var(--green);transition:color 0.3s;min-width:80px;}
+.acc-label-sm{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;}
+.acc-feature-name{font-family:var(--mono);font-size:13px;color:var(--text);}
+.acc-separator{width:1px;height:32px;background:var(--border2);}
+.note{font-size:11px;color:var(--text3);line-height:1.7;padding-top:0.8rem;font-family:var(--mono);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-tag">// intro to ai &middot; project 2</div>
+    <h1>Feature Selection</h1>
+    <div class="header-sub">
+      <a href="https://github.com/ActualCookie88/IntroToAIProjects" target="_blank">github.com/ActualCookie88/IntroToAIProjects</a>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge">C++17</span>
+    <span class="badge">CMake</span>
+    <span class="badge">STL</span>
+  </div>
+</div>
+
+<div class="stat-row">
+  <div class="stat">
+    <div class="stat-label">Dataset</div>
+    <div class="stat-val" style="font-size:14px">UCI Wine</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Samples / Features</div>
+    <div class="stat-val" style="font-size:16px">178 / 13</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Classes</div>
+    <div class="stat-val">3</div>
+  </div>
+</div>
+
+<div class="controls-row">
+  <label>Algorithm:</label>
+  <select id="fs-algo" onchange="onAlgoChange()">
+    <option>Forward selection</option>
+    <option>Backward elimination</option>
+  </select>
+  <div class="overlay-toggle">
+    <button class="ov-btn active" id="ov-single" onclick="setOverlay(false)">Single</button>
+    <button class="ov-btn" id="ov-both" onclick="setOverlay(true)">Overlay</button>
+  </div>
+</div>
+
+<div class="chart-legend" id="chart-legend" style="display:none;">
+  <div class="legend-pill">
+    <div class="legend-line" style="background:var(--cyan)"></div>
+    <span>Forward selection</span>
+  </div>
+  <div class="legend-pill">
+    <div class="legend-line" style="background:var(--amber)"></div>
+    <span>Backward elimination</span>
+  </div>
+</div>
+
+<div class="section-label">1-NN LOOCV accuracy by number of features used</div>
+<div class="chart-wrap">
+  <canvas id="featureChart"></canvas>
+</div>
+
+<hr>
+
+<div class="acc-live" id="acc-live">
+  <div>
+    <div class="acc-label-sm">Current accuracy</div>
+    <div class="acc-val-big" id="acc-big">—</div>
+  </div>
+  <div class="acc-separator"></div>
+  <div>
+    <div class="acc-label-sm">Last feature added</div>
+    <div class="acc-feature-name" id="acc-feat-name">—</div>
+  </div>
+  <div class="acc-separator"></div>
+  <div>
+    <div class="acc-label-sm">Features selected</div>
+    <div class="acc-feature-name" id="acc-feat-count">—</div>
+  </div>
+</div>
+
+<div class="feat-bars-header">
+  <div class="section-label" style="margin:0">Top contributing features (forward selection order)</div>
+  <button class="reveal-btn" id="reveal-btn" onclick="startReveal()">&#9654; Reveal Features</button>
+</div>
+<div class="feat-bars" id="feature-bars"></div>
+
+<div class="note">
+  // Accuracy values are representative of typical 1-NN + LOOCV results on UCI Wine (ID 109).<br>
+  // Replace with your actual program output. The jump from ~72% (all 13) to ~97% (best subset)<br>
+  // demonstrates that irrelevant features degrade a simple nearest-neighbor classifier.<br>
+  // Overlay mode shows both algorithms simultaneously for direct comparison.
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const fwdAcc = [null,72,84,91,95,96.5,97,97.1,96.8,96.5,95.9,95.2,94.8,92];
+const bwdAcc = [null,72,82,89,93,95,96.3,96.8,96.9,96.7,96.1,95.0,94.1,72];
+
+const featureData = [
+  {name:'Flavanoids',      order:1, score:97, delta:'+25.0%', acc:97},
+  {name:'Proline',         order:2, score:94, delta:'+12.0%', acc:84},
+  {name:'Color intensity', order:3, score:90, delta:'+7.0%',  acc:91},
+  {name:'Alcohol',         order:4, score:86, delta:'+4.0%',  acc:95},
+  {name:'OD280/OD315',     order:5, score:81, delta:'+1.5%',  acc:96.5},
+];
+
+let chartInstance = null;
+let overlayMode = false;
+let revealTimers = [];
+
+function setOverlay(on) {
+  overlayMode = on;
+  document.getElementById('ov-single').classList.toggle('active', !on);
+  document.getElementById('ov-both').classList.toggle('active', on);
+  document.getElementById('chart-legend').style.display = on ? 'flex' : 'none';
+  document.getElementById('fs-algo').disabled = on;
+  renderChart();
+}
+
+function onAlgoChange() { renderChart(); }
+
+function renderChart() {
+  if (chartInstance) chartInstance.destroy();
+  const isFwd = document.getElementById('fs-algo').value === 'Forward selection';
+  const labels = Array.from({length:13},(_,i)=>i+1);
+  const fwdData = fwdAcc.slice(1);
+  const bwdData = bwdAcc.slice(1);
+  const fwdPeak = Math.max(...fwdData);
+  const bwdPeak = Math.max(...bwdData);
+
+  const datasets = overlayMode ? [
+    {
+      label:'Forward selection',
+      data:fwdData,
+      borderColor:'#22d3ee',
+      backgroundColor:'rgba(34,211,238,0.04)',
+      pointBackgroundColor:fwdData.map(v=>v===fwdPeak?'#4ade80':'#22d3ee'),
+      pointBorderColor:fwdData.map(v=>v===fwdPeak?'#22c55e':'#22d3ee'),
+      pointRadius:fwdData.map(v=>v===fwdPeak?7:3),
+      tension:0.3, fill:true, borderWidth:2,
+    },
+    {
+      label:'Backward elimination',
+      data:bwdData,
+      borderColor:'#f59e0b',
+      backgroundColor:'rgba(245,158,11,0.04)',
+      pointBackgroundColor:bwdData.map(v=>v===bwdPeak?'#4ade80':'#f59e0b'),
+      pointBorderColor:bwdData.map(v=>v===bwdPeak?'#22c55e':'#f59e0b'),
+      pointRadius:bwdData.map(v=>v===bwdPeak?7:3),
+      tension:0.3, fill:true, borderWidth:2, borderDash:[4,3],
+    }
+  ] : [{
+    label:'1-NN LOOCV accuracy (%)',
+    data: isFwd ? fwdData : bwdData,
+    borderColor: isFwd ? '#22d3ee' : '#f59e0b',
+    backgroundColor: isFwd ? 'rgba(34,211,238,0.06)' : 'rgba(245,158,11,0.06)',
+    pointBackgroundColor:(isFwd?fwdData:bwdData).map(v=>v===Math.max(...(isFwd?fwdData:bwdData))?'#4ade80':(isFwd?'#22d3ee':'#f59e0b')),
+    pointBorderColor:(isFwd?fwdData:bwdData).map(v=>v===Math.max(...(isFwd?fwdData:bwdData))?'#22c55e':(isFwd?'#22d3ee':'#f59e0b')),
+    pointRadius:(isFwd?fwdData:bwdData).map(v=>v===Math.max(...(isFwd?fwdData:bwdData))?7:3),
+    tension:0.3, fill:true, borderWidth:2,
+  }];
+
+  chartInstance = new Chart(document.getElementById('featureChart'), {
+    type:'line',
+    data:{labels, datasets},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      animation:{duration:500},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{label:ctx=>ctx.dataset.label.split(' ')[0]+': '+ctx.parsed.y.toFixed(1)+'%'},
+          backgroundColor:'#1c201e',borderColor:'rgba(255,255,255,0.13)',borderWidth:1,
+          titleColor:'#8a9690',bodyColor:'#e8ece9',
+          titleFont:{family:'IBM Plex Mono',size:10},bodyFont:{family:'IBM Plex Mono',size:12}
+        }
+      },
+      scales:{
+        x:{
+          title:{display:true,text:'Number of features',color:'#4f5c58',font:{family:'IBM Plex Mono',size:10}},
+          ticks:{color:'#4f5c58',font:{family:'IBM Plex Mono',size:10}},
+          grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(255,255,255,0.07)'}
+        },
+        y:{
+          min:60,max:100,
+          title:{display:true,text:'Accuracy (%)',color:'#4f5c58',font:{family:'IBM Plex Mono',size:10}},
+          ticks:{callback:v=>v+'%',color:'#4f5c58',font:{family:'IBM Plex Mono',size:10}},
+          grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(255,255,255,0.07)'}
+        }
+      }
+    }
+  });
+}
+
+function buildBars() {
+  const div = document.getElementById('feature-bars');
+  div.innerHTML = '';
+  featureData.forEach((f,i)=>{
+    div.innerHTML += `
+      <div class="feat-bar-row" id="fbar-${i}">
+        <div class="feat-bar-name">${f.name}<span class="feat-order">STEP ${f.order}</span></div>
+        <div class="feat-bar-bg"><div class="feat-bar-fill" id="ffill-${i}"></div></div>
+        <div class="feat-bar-val">${f.score}%</div>
+        <div class="acc-delta">${f.delta}</div>
+      </div>`;
+  });
+}
+
+function resetReveal() {
+  revealTimers.forEach(t=>clearTimeout(t));
+  revealTimers = [];
+  featureData.forEach((_,i)=>{
+    const row = document.getElementById('fbar-'+i);
+    const fill = document.getElementById('ffill-'+i);
+    if (row) row.classList.remove('visible');
+    if (fill) fill.style.width = '0%';
+  });
+  document.getElementById('acc-big').textContent = '—';
+  document.getElementById('acc-feat-name').textContent = '—';
+  document.getElementById('acc-feat-count').textContent = '—';
+  document.getElementById('acc-big').style.color = 'var(--green)';
+}
+
+function startReveal() {
+  resetReveal();
+  const btn = document.getElementById('reveal-btn');
+  btn.disabled = true;
+  btn.textContent = '● Revealing...';
+
+  featureData.forEach((f,i)=>{
+    revealTimers.push(setTimeout(()=>{
+      const row = document.getElementById('fbar-'+i);
+      const fill = document.getElementById('ffill-'+i);
+      if (row) row.classList.add('visible');
+      revealTimers.push(setTimeout(()=>{ if (fill) fill.style.width=f.score+'%'; }, 80));
+
+      document.getElementById('acc-big').textContent = f.acc.toFixed(1)+'%';
+      document.getElementById('acc-feat-name').textContent = f.name;
+      document.getElementById('acc-feat-count').textContent = (i+1)+' / 5';
+      const accEl = document.getElementById('acc-big');
+      accEl.style.color = f.acc>=96?'var(--green)':f.acc>=90?'var(--cyan)':'var(--amber)';
+
+      if (i===featureData.length-1) {
+        btn.disabled = false;
+        btn.textContent = '\u21BA Replay';
+      }
+    }, i*620));
+  });
+}
+
+buildBars();
+renderChart();
+</script>
+</body>
+</html>
