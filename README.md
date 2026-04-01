@@ -3,11 +3,11 @@
 By Luke Matsunaga  
 
 Project completed as part of an Intro to Artificial Intelligence course.  
+
 Focus: Implementing feature selection algorithms for improving classification performance.
 
-This project implements feature selection techniques in C++ to evaluate and identify the most relevant features in a dataset.
+This project implements feature selection techniques in C++ to evaluate and identify the most relevant features in a dataset using:
 
-## Algorithms Implemented
 - Forward Selection  
 - Backward Elimination  
 - Nearest Neighbor evaluation (leave-one-out validation)
@@ -34,13 +34,12 @@ This project implements feature selection techniques in C++ to evaluate and iden
 - Link to dataset: https://archive.ics.uci.edu/dataset/109/wine
 
 ## Building the Project
-1. Clone the repo (if you haven't already)
+1. Clone the repo
 ```bash
-git clone https://github.com/ActualCookie88/IntroToAIProjects.git
+git clone https://github.com/ActualCookie88/Dataset-Feature-Selection.git
 ```
-2. Navigate to folder and build executable
+2. Build executable
 ```bash
-cd Dataset_Feature_Selection/
 g++ -std=c++17 feature_selection.cpp -o feature_selection
 ```
 
@@ -52,8 +51,10 @@ feature_selection.exe      # Windows
 
 You will be prompted to:
 
+Choose an existing dataset file or provide your own
 Choose the algorithm (Forward Selection or Backward Elimination)
-Provide a dataset file
+
+Note: the program may seem frozen for large datasets, but it is simply slow
 
 ## Output
 
