@@ -42,7 +42,6 @@ body {
   overflow-x: hidden;
 }
 
-/* noise texture overlay */
 body::before {
   content: '';
   position: fixed;
@@ -123,41 +122,58 @@ h1 span { color: var(--cyan); }
 /* ── Stats ── */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
   margin-bottom: 2.5rem;
 }
 .stat-card {
   background: var(--bg2);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 14px 16px;
-  position: relative;
   overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  position: relative;
 }
 .stat-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: var(--cyan);
-  opacity: 0.3;
+}
+.stat-card.small-card::before { background: var(--cyan); }
+.stat-card.large-card::before { background: var(--amber); }
+.stat-inner {
+  padding: 16px 18px;
+}
+.stat-divider {
+  background: var(--line);
 }
 .stat-label {
   font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--dim);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 .stat-val {
   font-family: var(--display);
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.02em;
+  line-height: 1;
 }
-.stat-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.stat-sub { font-size: 10px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+.stat-feats {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-family: var(--mono);
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid;
+}
 
 /* ── Section header ── */
 .section-head {
@@ -262,6 +278,34 @@ hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
   padding: 14px 20px;
   margin-bottom: 2rem;
 }
+
+/* Dual readout for overlay mode */
+.readout-dual {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 20px;
+  margin-bottom: 2rem;
+}
+.readout-dual-col {
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+.readout-dual-col.fwd-col { border-left: 3px solid var(--cyan); background: rgba(56,217,245,0.03); }
+.readout-dual-col.bwd-col { border-left: 3px solid var(--amber); background: rgba(240,164,67,0.03); }
+.readout-dual-algo {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.fwd-col .readout-dual-algo { color: var(--cyan); }
+.bwd-col .readout-dual-algo { color: var(--amber); }
+
 .readout-sep { width: 1px; height: 30px; background: var(--line2); }
 .readout-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); margin-bottom: 4px; }
 .readout-val {
@@ -299,6 +343,7 @@ hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
 .reveal-btn:hover { background: rgba(56,217,245,0.14); }
 .reveal-btn:disabled { opacity: 0.4; cursor: default; }
 
+/* Single-algo bar layout */
 .bar-list { display: flex; flex-direction: column; gap: 10px; }
 .bar-row {
   display: grid;
@@ -347,6 +392,54 @@ hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
 .delta-neg { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.15); color: var(--red); }
 .delta-neu { background: var(--bg3); border: 1px solid var(--line2); color: var(--muted); }
 
+/* ── Dual (overlay) bar layout ── */
+.dual-bar-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.dual-bar-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dual-col-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 2px;
+}
+.dual-col-swatch {
+  width: 20px; height: 2px; border-radius: 1px;
+}
+
+/* bar rows inside dual layout */
+.dual-bar-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 50px;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.dual-bar-row.visible { opacity: 1; transform: translateX(0); }
+.dual-bar-row .bar-name { font-size: 10px; }
+.dual-bar-row .bar-acc {
+  font-family: var(--display);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+  opacity: 0;
+  transition: opacity 0.3s 0.5s;
+}
+.dual-bar-row.visible .bar-acc { opacity: 1; }
+
 /* ── Algo note ── */
 .algo-note {
   margin-top: 2rem;
@@ -372,12 +465,15 @@ hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
 }
 
 @media (max-width: 640px) {
-  .stats-grid { grid-template-columns: repeat(2,1fr); }
+  .stats-grid { grid-template-columns: 1fr; }
   .header { grid-template-columns: 1fr; }
   .bar-row { grid-template-columns: 130px 1fr 44px; }
   .bar-delta { display: none; }
   .readout { grid-template-columns: 1fr; gap: 8px; }
   .readout-sep { display: none; }
+  .dual-bar-container { grid-template-columns: 1fr; }
+  .dual-bar-row { grid-template-columns: 110px 1fr 44px; }
+  .readout-dual { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -387,7 +483,7 @@ hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
   <!-- Header -->
   <header class="header">
     <div>
-      <div class="eyebrow">CS170 · AI Feature Selection</div>
+      <div class="eyebrow">CS170 · Introduction to Artificial Intelligence</div>
       <h1>Dataset<br><span>Feature</span> Selection</h1>
       <p class="subtitle">
         Greedy search over feature subsets evaluated by 1-NN leave-one-out cross-validation.
@@ -406,25 +502,35 @@ hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
 
   <!-- Stats -->
   <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">Small Dataset</div>
-      <div class="stat-val">500</div>
-      <div class="stat-sub">instances · 16 features · 2 classes</div>
+    <!-- Small dataset -->
+    <div class="stat-card small-card">
+      <div class="stat-inner">
+        <div class="stat-label">Small Dataset</div>
+        <div class="stat-val">500</div>
+        <div class="stat-sub">instances<br>16 features · 2 classes</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-inner">
+        <div class="stat-label">Best Accuracy</div>
+        <div class="stat-val" style="color:var(--green)">95.8%</div>
+        <div class="stat-sub">forward &amp; backward</div>
+        <div class="stat-feats" style="color:var(--green);border-color:rgba(74,222,128,0.25);background:rgba(74,222,128,0.06)">{6, 15}</div>
+      </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Large Dataset</div>
-      <div class="stat-val">300</div>
-      <div class="stat-sub">instances · 64 features · 2 classes</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Best Accuracy (Small)</div>
-      <div class="stat-val" style="color:var(--green)">95.8%</div>
-      <div class="stat-sub">2 features — {6, 15}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Best Accuracy (Large)</div>
-      <div class="stat-val" style="color:var(--cyan)">96.8%</div>
-      <div class="stat-sub">2 features — {50, 63}</div>
+    <!-- Large dataset -->
+    <div class="stat-card large-card">
+      <div class="stat-inner">
+        <div class="stat-label">Large Dataset</div>
+        <div class="stat-val">3000</div>
+        <div class="stat-sub">instances<br>64 features · 2 classes</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-inner">
+        <div class="stat-label">Best Accuracy</div>
+        <div class="stat-val" style="color:var(--cyan)">96.8%</div>
+        <div class="stat-sub">forward selection</div>
+        <div class="stat-feats" style="color:var(--cyan);border-color:rgba(56,217,245,0.25);background:rgba(56,217,245,0.06)">{50, 63}</div>
+      </div>
     </div>
   </div>
 
@@ -472,8 +578,8 @@ hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
 
   <hr>
 
-  <!-- Readout -->
-  <div class="readout" id="readout">
+  <!-- Readout (single algo) -->
+  <div class="readout" id="readout-single" style="grid-template-columns: auto 1px auto 1px 1fr 1px auto;">
     <div>
       <div class="readout-label">Current accuracy</div>
       <div class="readout-val" id="r-acc">—</div>
@@ -490,19 +596,69 @@ hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
       <div class="readout-sub" id="r-count">—</div>
       <div class="readout-note" id="r-delta">—</div>
     </div>
+    <div class="readout-sep" id="r-peak-sep" style="opacity:0;transition:opacity 0.4s"></div>
+    <div id="r-peak-block" style="opacity:0;transition:opacity 0.4s">
+      <div class="readout-label">Peak accuracy</div>
+      <div class="readout-val" id="r-peak-acc" style="color:var(--green)">—</div>
+      <div class="readout-note" id="r-peak-sub">—</div>
+    </div>
+  </div>
+
+  <!-- Readout (overlay / both) -->
+  <div class="readout-dual" id="readout-dual" style="display:none">
+    <div class="readout-dual-col fwd-col">
+      <div class="readout-dual-algo">▶ Forward selection</div>
+      <div class="readout-label">Accuracy</div>
+      <div class="readout-val" id="rd-fwd-acc" style="font-size:20px;color:var(--cyan)">—</div>
+      <div class="readout-note" id="rd-fwd-feat" style="margin-top:4px">—</div>
+      <div class="readout-note" id="rd-fwd-step">—</div>
+      <div id="rd-fwd-peak-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);opacity:0;transition:opacity 0.4s;display:none">
+        <div class="readout-label">Peak accuracy</div>
+        <div class="readout-val" id="rd-fwd-peak-acc" style="font-size:18px;color:var(--green)">—</div>
+        <div class="readout-note" id="rd-fwd-peak-sub">—</div>
+      </div>
+    </div>
+    <div class="readout-dual-col bwd-col">
+      <div class="readout-dual-algo">◀ Backward elimination</div>
+      <div class="readout-label">Accuracy</div>
+      <div class="readout-val" id="rd-bwd-acc" style="font-size:20px;color:var(--amber)">—</div>
+      <div class="readout-note" id="rd-bwd-feat" style="margin-top:4px">—</div>
+      <div class="readout-note" id="rd-bwd-step">—</div>
+      <div id="rd-bwd-peak-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);opacity:0;transition:opacity 0.4s;display:none">
+        <div class="readout-label">Peak accuracy</div>
+        <div class="readout-val" id="rd-bwd-peak-acc" style="font-size:18px;color:var(--green)">—</div>
+        <div class="readout-note" id="rd-bwd-peak-sub">—</div>
+      </div>
+    </div>
   </div>
 
   <!-- Feature bars -->
   <div class="bars-header">
-    <div class="section-label">Step-by-step contribution (forward selection, small dataset)</div>
+    <div class="section-label" id="bars-section-label">Step-by-step contribution (forward selection, small dataset)</div>
     <button class="reveal-btn" id="reveal-btn" onclick="startReveal()">▶ Reveal Steps</button>
   </div>
+  <!-- single-algo bar list -->
   <div class="bar-list" id="bar-list"></div>
+  <!-- dual (overlay) bar container -->
+  <div class="dual-bar-container" id="dual-bar-container" style="display:none">
+    <div class="dual-bar-col" id="dual-fwd-col">
+      <div class="dual-col-header">
+        <div class="dual-col-swatch" style="background:var(--cyan)"></div>
+        <span style="color:var(--cyan)">Forward selection</span>
+      </div>
+    </div>
+    <div class="dual-bar-col" id="dual-bwd-col">
+      <div class="dual-col-header">
+        <div class="dual-col-swatch" style="background:var(--amber)"></div>
+        <span style="color:var(--amber)">Backward elimination</span>
+      </div>
+    </div>
+  </div>
 
   <!-- Algo note -->
   <div class="algo-note" id="algo-note">
     <strong>Forward selection peak:</strong> Features {6, 15} at <strong>95.8%</strong> accuracy —
-    up from a baseline of 74.8% using all 16 features. Adding a 3rd feature drops accuracy to 94%, 
+    up from a baseline of 74.8% using all 16 features. Adding a 3rd feature drops accuracy to 94%,
     showing that irrelevant features actively degrade nearest-neighbor classification.
     Both algorithms converge on the same optimal subset for this dataset.
   </div>
@@ -518,7 +674,7 @@ hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 
-// ── Raw data from actual program output ──────────────────────────────────────
+// ── Raw data ──────────────────────────────────────────────────────────────────
 
 const DATA = {
   small: {
@@ -535,11 +691,12 @@ const DATA = {
     fwdBest: { acc: 96.8, feats: '{50, 63}', step: 2 },
     bwdBest: { acc: 73.9667, feats: '39-feature subset', step: 26 },
     n: 64,
-    instances: 300
+    instances: 3000
   }
 };
 
-// ── Step-by-step reveal data (from actual program output) ────────────────────
+// ── Step-by-step reveal data ──────────────────────────────────────────────────
+
 const REVEAL_STEPS = {
   small_fwd: [
     { feat: 'Feature 6',  step: 1,  total: 16, acc: 86,    prev: null,  delta: '+11.2%' },
@@ -608,19 +765,14 @@ const REVEAL_STEPS = {
   ],
 };
 
-function getCurrentSteps() {
-  const key = currentAlgo === 'both' ? `${currentDataset}_fwd` : `${currentDataset}_${currentAlgo}`;
-  return REVEAL_STEPS[key] || [];
-}
-
-// ── State ────────────────────────────────────────────────────────────────────
+// ── State ─────────────────────────────────────────────────────────────────────
 
 let currentDataset = 'small';
 let currentAlgo    = 'fwd';
 let chartInst      = null;
 let revealTimers   = [];
 
-// ── Controls ─────────────────────────────────────────────────────────────────
+// ── Controls ──────────────────────────────────────────────────────────────────
 
 function setDataset(d) {
   currentDataset = d;
@@ -629,6 +781,8 @@ function setDataset(d) {
   });
   updateChart();
   updateNote();
+  buildBars();
+  resetReveal();
 }
 
 function setAlgo(a) {
@@ -641,6 +795,8 @@ function setAlgo(a) {
   document.getElementById('leg-bwd').style.display = (a==='fwd') ? 'none' : 'flex';
   updateChart();
   updateNote();
+  buildBars();
+  resetReveal();
 }
 
 // ── Chart ─────────────────────────────────────────────────────────────────────
@@ -654,7 +810,7 @@ function buildDatasets() {
   const bwdData = d.bwd.slice(0, n);
 
   const mkPoints = (arr, color) =>
-    arr.map((v, i) => {
+    arr.map(v => {
       const peak = Math.max(...arr.filter(x => x > 0));
       return v === peak ? '#4ade80' : color;
     });
@@ -663,56 +819,47 @@ function buildDatasets() {
     arr.map(v => v === Math.max(...arr.filter(x => x > 0)) ? 7 : 3);
 
   if (currentAlgo === 'fwd') {
-    return {
-      labels,
-      datasets: [{
+    return { labels, datasets: [{
+      label: 'Forward selection',
+      data: fwdData,
+      borderColor: '#38d9f5',
+      backgroundColor: 'rgba(56,217,245,0.05)',
+      pointBackgroundColor: mkPoints(fwdData, '#38d9f5'),
+      pointRadius: mkRadius(fwdData),
+      tension: 0.35, fill: true, borderWidth: 2,
+    }]};
+  } else if (currentAlgo === 'bwd') {
+    return { labels, datasets: [{
+      label: 'Backward elimination',
+      data: bwdData,
+      borderColor: '#f0a443',
+      backgroundColor: 'rgba(240,164,67,0.05)',
+      pointBackgroundColor: mkPoints(bwdData, '#f0a443'),
+      pointRadius: mkRadius(bwdData),
+      tension: 0.35, fill: true, borderWidth: 2,
+    }]};
+  } else {
+    return { labels, datasets: [
+      {
         label: 'Forward selection',
         data: fwdData,
         borderColor: '#38d9f5',
-        backgroundColor: 'rgba(56,217,245,0.05)',
+        backgroundColor: 'rgba(56,217,245,0.04)',
         pointBackgroundColor: mkPoints(fwdData, '#38d9f5'),
         pointRadius: mkRadius(fwdData),
         tension: 0.35, fill: true, borderWidth: 2,
-      }]
-    };
-  } else if (currentAlgo === 'bwd') {
-    return {
-      labels,
-      datasets: [{
+      },
+      {
         label: 'Backward elimination',
         data: bwdData,
         borderColor: '#f0a443',
-        backgroundColor: 'rgba(240,164,67,0.05)',
+        backgroundColor: 'rgba(240,164,67,0.04)',
         pointBackgroundColor: mkPoints(bwdData, '#f0a443'),
         pointRadius: mkRadius(bwdData),
         tension: 0.35, fill: true, borderWidth: 2,
-      }]
-    };
-  } else {
-    return {
-      labels,
-      datasets: [
-        {
-          label: 'Forward selection',
-          data: fwdData,
-          borderColor: '#38d9f5',
-          backgroundColor: 'rgba(56,217,245,0.04)',
-          pointBackgroundColor: mkPoints(fwdData, '#38d9f5'),
-          pointRadius: mkRadius(fwdData),
-          tension: 0.35, fill: true, borderWidth: 2,
-        },
-        {
-          label: 'Backward elimination',
-          data: bwdData,
-          borderColor: '#f0a443',
-          backgroundColor: 'rgba(240,164,67,0.04)',
-          pointBackgroundColor: mkPoints(bwdData, '#f0a443'),
-          pointRadius: mkRadius(bwdData),
-          tension: 0.35, fill: true, borderWidth: 2,
-          borderDash: [4, 3],
-        }
-      ]
-    };
+        borderDash: [4, 3],
+      }
+    ]};
   }
 }
 
@@ -750,8 +897,7 @@ function updateChart() {
         border: { color: 'rgba(255,255,255,0.06)' },
       },
       y: {
-        min: minY,
-        max: 100,
+        min: minY, max: 100,
         title: { display: true, text: 'accuracy (%)', color: '#3a4259', font: { family: 'IBM Plex Mono', size: 10 } },
         ticks: { callback: v => v + '%', color: '#3a4259', font: { family: 'IBM Plex Mono', size: 9 } },
         grid: { color: 'rgba(255,255,255,0.04)' },
@@ -765,7 +911,7 @@ function updateChart() {
         const ds  = config.datasets[el.datasetIndex];
         const acc = ds.data[idx];
         const isFwd = ds.label.includes('Forward');
-        updateReadout(acc, idx + 1, isFwd);
+        if (currentAlgo !== 'both') updateReadout(acc, idx + 1, isFwd);
       }
     }
   };
@@ -801,30 +947,46 @@ function updateNote() {
   document.getElementById('algo-note').innerHTML = NOTES[key] || '';
 }
 
-// ── Bar reveal ────────────────────────────────────────────────────────────────
+// ── Bar build ─────────────────────────────────────────────────────────────────
 
 function getBarsLabel() {
-  const algo = currentAlgo === 'both' ? 'forward selection' :
-               currentAlgo === 'fwd'  ? 'forward selection' : 'backward elimination';
-  const ds   = currentDataset === 'small' ? 'small dataset (16 features)' : 'large dataset (64 features)';
+  const ds = currentDataset === 'small' ? 'small (16 features)' : 'large (64 features)';
+  if (currentAlgo === 'both') return `Step-by-step contribution — both algorithms, ${ds}`;
+  const algo = currentAlgo === 'fwd' ? 'forward selection' : 'backward elimination';
   return `Step-by-step contribution — ${algo}, ${ds}`;
 }
 
 function buildBars() {
-  const steps = getCurrentSteps();
+  document.getElementById('bars-section-label').textContent = getBarsLabel();
+
+  const isBoth = currentAlgo === 'both';
+  document.getElementById('bar-list').style.display        = isBoth ? 'none' : 'flex';
+  document.getElementById('dual-bar-container').style.display = isBoth ? 'grid' : 'none';
+  document.getElementById('readout-single').style.display  = isBoth ? 'none' : 'grid';
+  document.getElementById('readout-dual').style.display    = isBoth ? 'grid' : 'none';
+
+  if (isBoth) {
+    buildDualBars();
+  } else {
+    buildSingleBars();
+  }
+}
+
+function buildSingleBars() {
+  const key = `${currentDataset}_${currentAlgo}`;
+  const steps = REVEAL_STEPS[key] || [];
   const peakAcc = Math.max(...steps.map(s => s.acc));
   const total = steps[0] ? steps[0].total : 16;
   const list = document.getElementById('bar-list');
   list.innerHTML = '';
-  // update section label
-  document.querySelector('.bars-header .section-label').textContent = getBarsLabel();
+
   steps.forEach((s, i) => {
     const isPeak = s.acc === peakAcc;
     const deltaClass = s.prev === null ? 'delta-pos' :
                        s.acc > s.prev  ? 'delta-pos' :
                        s.acc < s.prev  ? 'delta-neg' : 'delta-neu';
-    const fillColor = isPeak ? 'var(--green)' : i < 2 ? 'var(--cyan)' : 'var(--muted)';
-    const accColor  = isPeak ? 'var(--green)' : i === 0 ? 'var(--cyan)' : 'var(--text)';
+    const fillColor = isPeak ? 'var(--green)' : currentAlgo === 'bwd' ? 'var(--amber)' : (i < 2 ? 'var(--cyan)' : 'var(--muted)');
+    const accColor  = isPeak ? 'var(--green)' : i === 0 ? (currentAlgo === 'bwd' ? 'var(--amber)' : 'var(--cyan)') : 'var(--text)';
     list.innerHTML += `
       <div class="bar-row" id="brow-${i}">
         <div class="bar-name">
@@ -840,22 +1002,160 @@ function buildBars() {
   });
 }
 
+function buildDualBars() {
+  const fwdSteps = REVEAL_STEPS[`${currentDataset}_fwd`] || [];
+  const bwdSteps = REVEAL_STEPS[`${currentDataset}_bwd`] || [];
+  const fwdPeak  = Math.max(...fwdSteps.map(s => s.acc));
+  const bwdPeak  = Math.max(...bwdSteps.map(s => s.acc));
+
+  const fwdCol = document.getElementById('dual-fwd-col');
+  const bwdCol = document.getElementById('dual-bwd-col');
+
+  // Preserve the header, clear the rest
+  const fwdHeader = fwdCol.querySelector('.dual-col-header').outerHTML;
+  const bwdHeader = bwdCol.querySelector('.dual-col-header').outerHTML;
+  fwdCol.innerHTML = fwdHeader;
+  bwdCol.innerHTML = bwdHeader;
+
+  fwdSteps.forEach((s, i) => {
+    const isPeak = s.acc === fwdPeak;
+    const fillColor = isPeak ? 'var(--green)' : i < 2 ? 'var(--cyan)' : 'rgba(56,217,245,0.45)';
+    const accColor  = isPeak ? 'var(--green)' : 'var(--cyan)';
+    fwdCol.innerHTML += `
+      <div class="dual-bar-row" id="dfrow-${i}">
+        <div class="bar-name">
+          ${s.feat}${isPeak ? ' <span style="color:var(--green);font-size:9px">★</span>' : ''}
+          <span class="bar-step">step ${s.step}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" id="dffill-${i}" style="background:${fillColor}"></div>
+        </div>
+        <div class="bar-acc" style="color:${accColor}" id="dfacc-${i}">${s.acc.toFixed(2)}%</div>
+      </div>`;
+  });
+
+  bwdSteps.forEach((s, i) => {
+    const isPeak = s.acc === bwdPeak;
+    const fillColor = isPeak ? 'var(--green)' : i < 2 ? 'var(--amber)' : 'rgba(240,164,67,0.45)';
+    const accColor  = isPeak ? 'var(--green)' : 'var(--amber)';
+    bwdCol.innerHTML += `
+      <div class="dual-bar-row" id="dbrow-${i}">
+        <div class="bar-name">
+          ${s.feat}${isPeak ? ' <span style="color:var(--green);font-size:9px">★</span>' : ''}
+          <span class="bar-step">step ${s.step}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" id="dbfill-${i}" style="background:${fillColor}"></div>
+        </div>
+        <div class="bar-acc" style="color:${accColor}" id="dbacc-${i}">${s.acc.toFixed(2)}%</div>
+      </div>`;
+  });
+}
+
+// ── Reveal summary ───────────────────────────────────────────────────────────
+
+function showPeakInReadout() {
+  const key      = `${currentDataset}_${currentAlgo}`;
+  const isBoth   = currentAlgo === 'both';
+
+  function fadeIn(el) {
+    el.style.display = 'block';
+    requestAnimationFrame(() => requestAnimationFrame(() => { el.style.opacity = '1'; }));
+  }
+
+  if (isBoth) {
+    const fwdSteps   = REVEAL_STEPS[`${currentDataset}_fwd`] || [];
+    const bwdSteps   = REVEAL_STEPS[`${currentDataset}_bwd`] || [];
+    const fwdPeak    = Math.max(...fwdSteps.map(s => s.acc));
+    const bwdPeak    = Math.max(...bwdSteps.map(s => s.acc));
+    const fwdPeakSt  = fwdSteps.find(s => s.acc === fwdPeak);
+    const bwdPeakSt  = bwdSteps.find(s => s.acc === bwdPeak);
+
+    document.getElementById('rd-fwd-peak-acc').textContent = fwdPeak.toFixed(2) + '%';
+    document.getElementById('rd-fwd-peak-sub').textContent = fwdPeakSt ? `step ${fwdPeakSt.step} — ${fwdPeakSt.feat}` : '—';
+    document.getElementById('rd-bwd-peak-acc').textContent = bwdPeak.toFixed(2) + '%';
+    document.getElementById('rd-bwd-peak-sub').textContent = bwdPeakSt ? `step ${bwdPeakSt.step} — ${bwdPeakSt.feat}` : '—';
+    fadeIn(document.getElementById('rd-fwd-peak-row'));
+    fadeIn(document.getElementById('rd-bwd-peak-row'));
+  } else {
+    const steps     = REVEAL_STEPS[key] || [];
+    const peakAcc   = Math.max(...steps.map(s => s.acc));
+    const peakStep  = steps.find(s => s.acc === peakAcc);
+
+    document.getElementById('r-peak-acc').textContent = peakAcc.toFixed(2) + '%';
+    document.getElementById('r-peak-sub').textContent = peakStep ? `step ${peakStep.step} — ${peakStep.feat}` : '—';
+    document.getElementById('r-peak-sep').style.opacity   = '1';
+    document.getElementById('r-peak-block').style.opacity = '1';
+  }
+}
+
+function hidePeakInReadout() {
+  // Single readout peak
+  document.getElementById('r-peak-sep').style.opacity   = '0';
+  document.getElementById('r-peak-block').style.opacity = '0';
+  document.getElementById('r-peak-acc').textContent = '—';
+  document.getElementById('r-peak-sub').textContent = '—';
+  // Dual readout peak rows
+  ['rd-fwd-peak-row', 'rd-bwd-peak-row'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.opacity = '0';
+    el.style.display = 'none';
+  });
+  document.getElementById('rd-fwd-peak-acc').textContent = '—';
+  document.getElementById('rd-fwd-peak-sub').textContent = '—';
+  document.getElementById('rd-bwd-peak-acc').textContent = '—';
+  document.getElementById('rd-bwd-peak-sub').textContent = '—';
+}
+
+// ── Reveal ────────────────────────────────────────────────────────────────────
+
 function resetReveal() {
   revealTimers.forEach(t => clearTimeout(t));
   revealTimers = [];
-  const steps = getCurrentSteps();
-  steps.forEach((_, i) => {
-    const row  = document.getElementById('brow-' + i);
-    const fill = document.getElementById('bfill-' + i);
-    if (row)  row.classList.remove('visible');
-    if (fill) fill.style.width = '0%';
-  });
-  document.getElementById('r-acc').textContent = '—';
-  document.getElementById('r-feat').textContent = '—';
-  document.getElementById('r-step').textContent = '—';
-  document.getElementById('r-count').textContent = '—';
-  document.getElementById('r-delta').textContent = '—';
-  document.getElementById('r-acc').style.color = 'var(--green)';
+
+  if (currentAlgo === 'both') {
+    const fwdSteps = REVEAL_STEPS[`${currentDataset}_fwd`] || [];
+    const bwdSteps = REVEAL_STEPS[`${currentDataset}_bwd`] || [];
+    fwdSteps.forEach((_, i) => {
+      const row  = document.getElementById('dfrow-' + i);
+      const fill = document.getElementById('dffill-' + i);
+      if (row)  row.classList.remove('visible');
+      if (fill) fill.style.width = '0%';
+    });
+    bwdSteps.forEach((_, i) => {
+      const row  = document.getElementById('dbrow-' + i);
+      const fill = document.getElementById('dbfill-' + i);
+      if (row)  row.classList.remove('visible');
+      if (fill) fill.style.width = '0%';
+    });
+    // reset dual readout
+    document.getElementById('rd-fwd-acc').textContent  = '—';
+    document.getElementById('rd-fwd-feat').textContent = '—';
+    document.getElementById('rd-fwd-step').textContent = '—';
+    document.getElementById('rd-bwd-acc').textContent  = '—';
+    document.getElementById('rd-bwd-feat').textContent = '—';
+    document.getElementById('rd-bwd-step').textContent = '—';
+  } else {
+    const key   = `${currentDataset}_${currentAlgo}`;
+    const steps = REVEAL_STEPS[key] || [];
+    steps.forEach((_, i) => {
+      const row  = document.getElementById('brow-' + i);
+      const fill = document.getElementById('bfill-' + i);
+      if (row)  row.classList.remove('visible');
+      if (fill) fill.style.width = '0%';
+    });
+    document.getElementById('r-acc').textContent   = '—';
+    document.getElementById('r-feat').textContent  = '—';
+    document.getElementById('r-step').textContent  = '—';
+    document.getElementById('r-count').textContent = '—';
+    document.getElementById('r-delta').textContent = '—';
+    document.getElementById('r-acc').style.color   = 'var(--green)';
+  }
+
+  hidePeakInReadout();
+  const btn = document.getElementById('reveal-btn');
+  btn.disabled = false;
+  btn.textContent = '▶ Reveal Steps';
 }
 
 function startReveal() {
@@ -863,15 +1163,25 @@ function startReveal() {
   const btn = document.getElementById('reveal-btn');
   btn.disabled = true;
   btn.textContent = '● Running…';
-  const steps = getCurrentSteps();
+
+  if (currentAlgo === 'both') {
+    startDualReveal(btn);
+  } else {
+    startSingleReveal(btn);
+  }
+}
+
+function startSingleReveal(btn) {
+  const key = `${currentDataset}_${currentAlgo}`;
+  const steps = REVEAL_STEPS[key] || [];
   const total = steps[0] ? steps[0].total : 16;
-  const algoLabel = (currentAlgo === 'bwd') ? 'backward elimination' : 'forward selection';
+  const algoLabel = currentAlgo === 'bwd' ? 'backward elimination' : 'forward selection';
 
   steps.forEach((s, i) => {
     revealTimers.push(setTimeout(() => {
       const row  = document.getElementById('brow-' + i);
       const fill = document.getElementById('bfill-' + i);
-      if (row) row.classList.add('visible');
+      if (row)  row.classList.add('visible');
       revealTimers.push(setTimeout(() => {
         if (fill) fill.style.width = Math.min(s.acc, 100) + '%';
       }, 80));
@@ -879,8 +1189,8 @@ function startReveal() {
       const el = document.getElementById('r-acc');
       el.textContent = s.acc.toFixed(2) + '%';
       el.style.color = s.acc >= 95 ? 'var(--green)' : s.acc >= 85 ? 'var(--cyan)' : 'var(--amber)';
-      document.getElementById('r-feat').textContent = s.feat;
-      document.getElementById('r-step').textContent = `step ${s.step} — ${algoLabel}`;
+      document.getElementById('r-feat').textContent  = s.feat;
+      document.getElementById('r-step').textContent  = `step ${s.step} — ${algoLabel}`;
       document.getElementById('r-count').textContent = `${s.step} / ${total} features`;
       document.getElementById('r-delta').textContent = s.prev === null ? 'from baseline' : `vs previous: ${s.delta}`;
 
@@ -888,19 +1198,66 @@ function startReveal() {
         setTimeout(() => {
           btn.disabled = false;
           btn.textContent = '↺ Replay';
+          showPeakInReadout();
         }, 500);
       }
     }, i * 680));
   });
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+function startDualReveal(btn) {
+  const fwdSteps = REVEAL_STEPS[`${currentDataset}_fwd`] || [];
+  const bwdSteps = REVEAL_STEPS[`${currentDataset}_bwd`] || [];
+  const maxLen   = Math.max(fwdSteps.length, bwdSteps.length);
+  const DELAY    = 680;
 
-// rebuild bars whenever dataset or algo changes
-const _origSetDataset = setDataset;
-setDataset = function(d) { _origSetDataset(d); buildBars(); resetReveal(); };
-const _origSetAlgo = setAlgo;
-setAlgo = function(a) { _origSetAlgo(a); buildBars(); resetReveal(); };
+  for (let i = 0; i < maxLen; i++) {
+    const fi = i; // closure
+    revealTimers.push(setTimeout(() => {
+      // Forward step
+      if (fi < fwdSteps.length) {
+        const s    = fwdSteps[fi];
+        const row  = document.getElementById('dfrow-' + fi);
+        const fill = document.getElementById('dffill-' + fi);
+        if (row)  row.classList.add('visible');
+        revealTimers.push(setTimeout(() => {
+          if (fill) fill.style.width = Math.min(s.acc, 100) + '%';
+        }, 80));
+        const fwdAccEl = document.getElementById('rd-fwd-acc');
+        fwdAccEl.textContent = s.acc.toFixed(2) + '%';
+        fwdAccEl.style.color = s.acc >= 95 ? 'var(--green)' : 'var(--cyan)';
+        document.getElementById('rd-fwd-feat').textContent = s.feat;
+        document.getElementById('rd-fwd-step').textContent = `step ${s.step} / ${s.total}`;
+      }
+
+      // Backward step
+      if (fi < bwdSteps.length) {
+        const s    = bwdSteps[fi];
+        const row  = document.getElementById('dbrow-' + fi);
+        const fill = document.getElementById('dbfill-' + fi);
+        if (row)  row.classList.add('visible');
+        revealTimers.push(setTimeout(() => {
+          if (fill) fill.style.width = Math.min(s.acc, 100) + '%';
+        }, 80));
+        const bwdAccEl = document.getElementById('rd-bwd-acc');
+        bwdAccEl.textContent = s.acc.toFixed(2) + '%';
+        bwdAccEl.style.color = s.acc >= 95 ? 'var(--green)' : s.acc >= 85 ? 'var(--amber)' : 'var(--amber)';
+        document.getElementById('rd-bwd-feat').textContent = s.feat;
+        document.getElementById('rd-bwd-step').textContent = `step ${s.step} / ${s.total}`;
+      }
+
+      if (fi === maxLen - 1) {
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = '↺ Replay';
+          showPeakInReadout();
+        }, 500);
+      }
+    }, fi * DELAY));
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
 
 buildBars();
 updateChart();
